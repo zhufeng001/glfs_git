@@ -198,6 +198,9 @@ nfs_inode_loc_fill (inode_t *inode, loc_t *loc, int how)
          * the inode table, and not a newly created one. For newly
          * created inode, inode_path returns null gfid as the path.
          */
+
+        // convert inode to resolvedpath;
+
         if (!uuid_is_null (inode->gfid)) {
                 ret = inode_path (inode, NULL, &resolvedpath);
                 if (ret < 0) {
@@ -206,7 +209,7 @@ nfs_inode_loc_fill (inode_t *inode, loc_t *loc, int how)
                         goto err;
                 }
         }
-
+        // get parent inode
         if (resolvedpath == NULL) {
                 char tmp_path[GFID_STR_PFX_LEN + 1] = {0,};
                 snprintf (tmp_path, sizeof (tmp_path), "<gfid:%s>",

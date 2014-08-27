@@ -101,6 +101,7 @@ __dentry_hash (dentry_t *dentry)
 static int
 __is_dentry_hashed (dentry_t *dentry)
 {
+	// check dentry->hash
         if (!dentry) {
                 gf_log_callingfn (THIS->name, GF_LOG_WARNING, "dentry not found");
                 return 0;
@@ -268,6 +269,8 @@ __inode_hash (inode_t *inode)
 static dentry_t *
 __dentry_search_for_inode (inode_t *inode, uuid_t pargfid, const char *name)
 {
+		// inode and name can't be null
+
         dentry_t *dentry = NULL;
         dentry_t *tmp = NULL;
 
@@ -281,6 +284,8 @@ __dentry_search_for_inode (inode_t *inode, uuid_t pargfid, const char *name)
            continue with the check */
         if (!pargfid || uuid_is_null (pargfid))
                 return NULL;
+
+        // get dentry by pargfid and name;
 
         list_for_each_entry (tmp, &inode->dentry_list, inode_list) {
                 if ((uuid_compare (tmp->parent->gfid, pargfid) == 0) &&
@@ -731,6 +736,7 @@ inode_grep_for_gfid (inode_table_t *table, inode_t *parent, const char *name,
 gf_boolean_t
 __is_root_gfid (uuid_t gfid)
 {
+	// check gfid is root ?
         uuid_t  root;
 
         memset (root, 0, 16);
@@ -746,6 +752,7 @@ __is_root_gfid (uuid_t gfid)
 inode_t *
 __inode_find (inode_table_t *table, uuid_t gfid)
 {
+	//get inode from table->inode_hash by cmd gfid
         inode_t   *inode = NULL;
         inode_t   *tmp = NULL;
         int        hash = 0;
@@ -758,6 +765,7 @@ __inode_find (inode_table_t *table, uuid_t gfid)
         if (__is_root_gfid (gfid))
                 return table->root;
 
+        // from gfid get hash
         hash = hash_gfid (gfid, 65536);
 
         list_for_each_entry (tmp, &table->inode_hash[hash], hash) {
@@ -775,8 +783,10 @@ out:
 inode_t *
 inode_find (inode_table_t *table, uuid_t gfid)
 {
-        inode_t   *inode = NULL;
+	// find inode from table by gfid
 
+        inode_t   *inode = NULL;
+        // check table
         if (!table) {
                 gf_log_callingfn (THIS->name, GF_LOG_WARNING, "table not found");
                 return NULL;
@@ -1063,6 +1073,8 @@ inode_rename (inode_table_t *table, inode_t *srcdir, const char *srcname,
 static dentry_t *
 __dentry_search_arbit (inode_t *inode)
 {
+	// inode-> dentry_list ??
+	// from inode->dentry_list get trav;
         dentry_t *dentry = NULL;
         dentry_t *trav = NULL;
 
@@ -1070,6 +1082,7 @@ __dentry_search_arbit (inode_t *inode)
                 return NULL;
 
         list_for_each_entry (trav, &inode->dentry_list, inode_list) {
+        	// check trav->hash
                 if (__is_dentry_hashed (trav)) {
                         dentry = trav;
                         break;
@@ -1090,6 +1103,8 @@ __dentry_search_arbit (inode_t *inode)
 inode_t *
 inode_parent (inode_t *inode, uuid_t pargfid, const char *name)
 {
+	// found parent inode by pargfid and name;
+	// get dentry->parent;
         inode_t       *parent = NULL;
         inode_table_t *table = NULL;
         dentry_t      *dentry = NULL;
@@ -1124,6 +1139,8 @@ inode_parent (inode_t *inode, uuid_t pargfid, const char *name)
 int
 __inode_path (inode_t *inode, const char *name, char **bufp)
 {
+	// put name to bufp; inode is the last child ?
+
         inode_table_t *table = NULL;
         inode_t       *itrav = NULL;
         dentry_t      *trav  = NULL;
@@ -1131,7 +1148,7 @@ __inode_path (inode_t *inode, const char *name, char **bufp)
         int64_t        ret   = 0;
         int            len   = 0;
         char          *buf   = NULL;
-
+        // check inode and gfid
         if (!inode || uuid_is_null (inode->gfid)) {
                 GF_ASSERT (0);
                 gf_log_callingfn (THIS->name, GF_LOG_WARNING, "invalid inode");
@@ -1140,6 +1157,9 @@ __inode_path (inode_t *inode, const char *name, char **bufp)
 
         table = inode->table;
 
+        // get all parent ?? get path; every trav is level
+        // store in trav->name
+        // get path length
         itrav = inode;
         for (trav = __dentry_search_arbit (itrav); trav;
              trav = __dentry_search_arbit (itrav)) {
@@ -1178,7 +1198,7 @@ __inode_path (inode_t *inode, const char *name, char **bufp)
                         buf[i-len-1] = '/';
                         i -= (len + 1);
                 }
-
+                // cp name and trav->name to buf;
                 itrav = inode;
                 for (trav = __dentry_search_arbit (itrav); trav;
                      trav = __dentry_search_arbit (itrav)) {
@@ -1222,6 +1242,7 @@ out:
 int
 inode_path (inode_t *inode, const char *name, char **bufp)
 {
+	// convert inode and name to bufp as path
         inode_table_t *table = NULL;
         int            ret   = -1;
 

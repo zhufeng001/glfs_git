@@ -36,6 +36,7 @@
 
 void uuid_copy(uuid_t dst, const uuid_t src)
 {
+	// cp to src to dst
 	unsigned char		*cp1;
 	const unsigned char	*cp2;
 	int			i;
