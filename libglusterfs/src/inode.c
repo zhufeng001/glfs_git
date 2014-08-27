@@ -130,6 +130,7 @@ __dentry_unhash (dentry_t *dentry)
 static void
 __dentry_unset (dentry_t *dentry)
 {
+	// free dentry;
 	// from dentry and delete from list;
         if (!dentry) {
                 gf_log_callingfn (THIS->name, GF_LOG_WARNING, "dentry not found");
@@ -235,6 +236,7 @@ __is_dentry_cyclic (dentry_t *dentry)
 static void
 __inode_unhash (inode_t *inode)
 {
+	// del node from hash list;
         if (!inode) {
                 gf_log_callingfn (THIS->name, GF_LOG_WARNING, "inode not found");
                 return;
@@ -382,6 +384,9 @@ __inode_passivate (inode_t *inode)
 static void
 __inode_retire (inode_t *inode)
 {
+	// table->purge and table->purge_size
+	// put inode to purge list;
+
         dentry_t      *dentry = NULL;
         dentry_t      *t = NULL;
 
@@ -394,7 +399,7 @@ __inode_retire (inode_t *inode)
         inode->table->purge_size++;
 
         __inode_unhash (inode);
-
+        // get dentry from inode->dentry_list ;and free dentry;
         list_for_each_entry_safe (dentry, t, &inode->dentry_list, inode_list) {
                 __dentry_unset (dentry);
         }
@@ -608,6 +613,7 @@ __inode_lookup (inode_t *inode)
 static inode_t *
 __inode_forget (inode_t *inode, uint64_t nlookup)
 {
+	// nlookup ??
         if (!inode)
                 return NULL;
 
@@ -910,6 +916,7 @@ inode_t *
 inode_link (inode_t *inode, inode_t *parent, const char *name,
             struct iatt *iatt)
 {
+	// get linknode from inode and parent and name;
         inode_table_t *table = NULL;
         inode_t       *linked_inode = NULL;
 
@@ -938,6 +945,7 @@ inode_link (inode_t *inode, inode_t *parent, const char *name,
 int
 inode_lookup (inode_t *inode)
 {
+	// inode->nlookup ++
         inode_table_t *table = NULL;
 
         if (!inode) {
@@ -1301,6 +1309,7 @@ inode_table_prune (inode_table_t *table)
         {
                 while (table->lru_limit
                        && table->lru_size > (table->lru_limit)) {
+                	// del entry inode until lru_size < limit ??
                 		// get enry of inode_t
                         entry = list_entry (table->lru.next, inode_t, list);
 
@@ -1317,6 +1326,8 @@ inode_table_prune (inode_table_t *table)
 
         {
                 list_for_each_entry_safe (del, tmp, &purge, list) {
+                	// delete del from purge list;
+                	// free del;
                         list_del_init (&del->list);
                         __inode_forget (del, 0);
                         __inode_destroy (del);

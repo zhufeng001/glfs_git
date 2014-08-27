@@ -201,6 +201,7 @@ out:
 int
 nfs3_set_root_looked_up (struct nfs3_state *nfs3, struct nfs3_fh *rootfh)
 {
+	// set exp's rootlookedup
         struct nfs3_export      *exp = NULL;
         int                     ret = 0;
 
@@ -1551,6 +1552,8 @@ nfs3_access_resume (void *carg)
         // push data from req to nfu;
         nfs_request_user_init (&nfu, cs->req);
         // lots of cbk !!
+
+        // cs->vol is xl->fops->access
         ret = nfs_access (cs->nfsx, cs->vol, &nfu, &cs->resolvedloc,
                           cs->accessbits, nfs3svc_access_cbk, cs);
         if (ret < 0)
@@ -1588,6 +1591,7 @@ nfs3_access (rpcsvc_request_t *req, struct nfs3_fh *fh, uint32_t accbits)
         nfs3_validate_nfs3_state (req, nfs3, stat, nfs3err, ret);
 
         // set req->private to vol
+        // vol is xl;
         nfs3_map_fh_to_volume (nfs3, fh, req, vol, stat, nfs3err);
 
         // vol should started
@@ -1598,6 +1602,7 @@ nfs3_access (rpcsvc_request_t *req, struct nfs3_fh *fh, uint32_t accbits)
         cs->accessbits = accbits;
 
         // 重中之重了。把inode和frame结合起来了。
+        // nfs3_access_resume is resume_fn;
         ret = nfs3_fh_resolve_and_resume (cs, fh, NULL, nfs3_access_resume);
         if (ret < 0)
                 stat = nfs3_errno_to_nfsstat3 (-ret);

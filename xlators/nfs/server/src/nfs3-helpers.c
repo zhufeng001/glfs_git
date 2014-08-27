@@ -35,7 +35,7 @@ nfs3_set_root_looked_up (struct nfs3_state *nfs3, struct nfs3_fh *rootfh);
 extern int
 nfs3_is_root_looked_up (struct nfs3_state *nfs3, struct nfs3_fh *rootfh);
 
-
+// call cst->resume_fn;
 #define nfs3_call_resume(cst)                                   \
         do {                                                    \
                 if (((cst)) && (cst)->resume_fn)                \
@@ -3521,6 +3521,7 @@ nfs3_log_readdir_call (uint32_t xid, struct nfs3_fh *fh, count3 dircount,
 int
 nfs3_fh_resolve_inode_done (nfs3_call_state_t *cs, inode_t *inode)
 {
+	//
         int             ret = -EFAULT;
 
         if ((!cs) || (!inode))
@@ -3585,6 +3586,7 @@ nfs3_fh_resolve_inode_lookup_cbk (call_frame_t *frame, void *cookie,
                                   struct iatt *buf, dict_t *xattr,
                                   struct iatt *postparent)
 {
+	//
         nfs3_call_state_t       *cs = NULL;
         inode_t                 *linked_inode = NULL;
 
@@ -3604,6 +3606,7 @@ nfs3_fh_resolve_inode_lookup_cbk (call_frame_t *frame, void *cookie,
        // cp  buf to cs'stbuf and cs'postparent
 	memcpy (&cs->stbuf, buf, sizeof(*buf));
 	memcpy (&cs->postparent, buf, sizeof(*postparent));
+	// get link_inode;
         linked_inode = inode_link (inode, cs->resolvedloc.parent,
                                    cs->resolvedloc.name, buf);
         if (linked_inode) {
@@ -3633,6 +3636,7 @@ err:
 int
 nfs3_fh_resolve_inode_hard (nfs3_call_state_t *cs)
 {
+	//
         int             ret = -EFAULT;
         nfs_user_t      nfu = {0, };
 
@@ -3664,6 +3668,7 @@ out:
 int
 nfs3_fh_resolve_entry_hard (nfs3_call_state_t *cs)
 {
+	//
         int             ret = -EFAULT;
         nfs_user_t      nfu = {0, };
 
@@ -3689,6 +3694,8 @@ nfs3_fh_resolve_entry_hard (nfs3_call_state_t *cs)
 		 * go ahead in the resume callback so that an EEXIST gets
 		 * handled at posix without an extra fop at this point.
 		 */
+                // check cs's req and createmode
+
                 if (nfs3_lookup_op (cs) ||
 		    (nfs3_create_op (cs) && !nfs3_create_exclusive_op (cs))) {
                         cs->lookuptype = GF_NFS3_FRESH;
@@ -3751,7 +3758,7 @@ nfs3_fh_resolve_entry (nfs3_call_state_t *cs)
 int
 nfs3_fh_resolve_resume (nfs3_call_state_t *cs)
 {
-	// 避其锋芒。
+	//
 
         int     ret = -EFAULT;
 
@@ -3785,6 +3792,7 @@ nfs3_fh_resolve_root_lookup_cbk (call_frame_t *frame, void *cookie,
                                  struct iatt *buf, dict_t *xattr,
                                  struct iatt *postparent)
 {
+	//
         nfs3_call_state_t       *cs = NULL;
 
         cs = frame->local;
@@ -3809,6 +3817,7 @@ err:
 int
 nfs3_fh_resolve_root (nfs3_call_state_t *cs)
 {
+	//
         int             ret = -EFAULT;
         nfs_user_t      nfu = {0, };
 

@@ -81,6 +81,7 @@ list_move (struct list_head *list, struct list_head *head)
 static inline void
 list_move_tail (struct list_head *list, struct list_head *head)
 {
+	// delete from prev list ,and insert after head;
 	list_del (list);
 	list_add_tail (list, head);
 }

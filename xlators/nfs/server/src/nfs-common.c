@@ -132,6 +132,7 @@ nfs_zero_filled_stat (struct iatt *buf)
 void
 nfs_loc_wipe (loc_t *loc)
 {
+	// init lco to 0;
         loc_wipe (loc);
 }
 
