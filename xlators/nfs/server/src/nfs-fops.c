@@ -33,6 +33,7 @@
 void
 nfs_fix_groups (xlator_t *this, call_stack_t *root)
 {
+	// get group info by root->uid and then put to root->group
         struct passwd    mypw;
         char             mystrs[1024];
         struct passwd    *result;
@@ -47,8 +48,10 @@ nfs_fix_groups (xlator_t *this, call_stack_t *root)
                 return;
         }
 
+    // gic_cache->gc_cache
 	agl = gid_cache_lookup(&priv->gid_cache, root->uid);
 	if (agl) {
+		// cp agl to root->groups ?
 		for (ngroups = 0; ngroups < agl->gl_count; ngroups++) 
 			root->groups[ngroups] = agl->gl_list[ngroups];
 		root->ngrps = ngroups;
@@ -57,6 +60,7 @@ nfs_fix_groups (xlator_t *this, call_stack_t *root)
 	}
 
 	/* No cached list found. */
+		// get pwd struct by uid and stored in mypw
         if (getpwuid_r(root->uid,&mypw,mystrs,sizeof(mystrs),&result) != 0) {
                 gf_log (this->name, GF_LOG_ERROR,
                         "getpwuid_r(%u) failed", root->uid);
@@ -78,7 +82,8 @@ nfs_fix_groups (xlator_t *this, call_stack_t *root)
                         "could not map %s to group list", result->pw_name);
                 return;
         }
-
+    // cp groups info to gl.gl_list
+    // add gl to gid_cache
 	/* Add the group data to the cache. */
 	gl.gl_list = GF_CALLOC(ngroups, sizeof(gid_t), gf_nfs_mt_aux_gids);
 	if (gl.gl_list) {
@@ -91,6 +96,7 @@ nfs_fix_groups (xlator_t *this, call_stack_t *root)
 	}
 
 	/* Copy data to the frame. */
+	// cp mygroups to root->groups
         for (i = 0; i < ngroups; ++i) {
                 gf_log (this->name, GF_LOG_TRACE,
                         "%s is in group %u", result->pw_name, mygroups[i]);
@@ -102,6 +108,7 @@ nfs_fix_groups (xlator_t *this, call_stack_t *root)
 struct nfs_fop_local *
 nfs_fop_local_init (xlator_t *nfsx)
 {
+		// malloc nfs_fop_local from nfsx->pool
         struct nfs_fop_local    *l = NULL;
 
         if (!nfsx)
@@ -172,6 +179,9 @@ nfs_frame_getctr ()
 call_frame_t *
 nfs_create_frame (xlator_t *xl, nfs_user_t *nfu)
 {
+	// cp nfu to frame->root (stack)
+	// malloc frame stack and frame->stack (root)
+	// return frame
         call_frame_t    *frame = NULL;
         int             x = 0;
         int             y = 0;
@@ -180,6 +190,7 @@ nfs_create_frame (xlator_t *xl, nfs_user_t *nfu)
                 return NULL;
 
         frame = create_frame (xl, (call_pool_t *)xl->ctx->pool);
+        // frame (stack->frames; frame->root is stack)
         if (!frame)
                 goto err;
 	if (call_stack_alloc_groups (frame->root, nfu->ngrps) != 0) {
@@ -187,12 +198,13 @@ nfs_create_frame (xlator_t *xl, nfs_user_t *nfu)
 		frame = NULL;
 		goto err;
 	}
-
+	// init stack (root)
         frame->root->pid = NFS_PID;
         frame->root->uid = nfu->uid;
         frame->root->gid = nfu->gids[NFS_PRIMGID_IDX];
         frame->root->lk_owner = nfu->lk_owner;
 
+        // assign nfu->gids to frame->root->groups
         if (nfu->ngrps != 1) {
                 frame->root->ngrps = nfu->ngrps - 1;
 
@@ -208,12 +220,14 @@ nfs_create_frame (xlator_t *xl, nfs_user_t *nfu)
          * It's tempting to do this *instead* of using nfu above, but we need
          * to have those values in case nfs_fix_groups doesn't do anything.
          */
+        // get frame->root->groups
         nfs_fix_groups(xl,frame->root);
 
 err:
         return frame;
 }
 
+// cp nfuser's data to fram->root
 #define nfs_fop_handle_frame_create(fram, xla, nfuser, retval, errlabel)      \
         do {                                                                  \
                 fram = nfs_create_frame (xla, (nfuser));                \
@@ -228,6 +242,7 @@ err:
  * for us to determine in the callback whether to funge the ino in the stat buf
  * with 1 for the parent.
  */
+// check loc is root ? and set locl ? set rootinode and rootparentinode
 #define nfs_fop_save_root_ino(locl, loc)                                \
         do {                                                            \
                 if (((loc)->inode) &&                                   \
@@ -460,6 +475,8 @@ int
 nfs_fop_access (xlator_t *nfsx, xlator_t *xl, nfs_user_t *nfu, loc_t *loc,
                 int32_t accesstest, fop_access_cbk_t cbk, void *local)
 {
+		// loc and accesstest is fn args.
+
         call_frame_t            *frame = NULL;
         int                     ret = -EFAULT;
         struct nfs_fop_local    *nfl = NULL;
@@ -469,11 +486,17 @@ nfs_fop_access (xlator_t *nfsx, xlator_t *xl, nfs_user_t *nfu, loc_t *loc,
                 return ret;
 
         gf_log (GF_NFS, GF_LOG_TRACE, "Access: %s", loc->path);
+        // malloc frame ; and cp nfu to frame
         nfs_fop_handle_frame_create (frame, nfsx, nfu, ret, err);
+        // malloc nfl and assign cbk
         nfs_fop_handle_local_init (frame, nfsx, nfl, cbk, local, ret, err);
+        // check loc is root ? and set locl ? set rootinode and rootparentinode
         nfs_fop_save_root_ino (nfl, loc);
 
         accessbits = nfs3_request_to_accessbits (accesstest);
+        				// frame, rfn,               cky, obj, fn, params
+        				// cky is _new->cookie
+        				// nfs_fop_access_cbk set to _new->ret
         STACK_WIND_COOKIE (frame, nfs_fop_access_cbk, xl, xl, xl->fops->access,
                            loc, accessbits, NULL);
         ret = 0;

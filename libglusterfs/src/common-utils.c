@@ -1873,6 +1873,7 @@ uuid_utoa (uuid_t uuid)
 char *
 uuid_utoa_r (uuid_t uuid, char *dst)
 {
+		// convert uuid to string
         if(!dst)
                 return NULL;
         uuid_unparse (uuid, dst);

@@ -29,6 +29,8 @@ int call_frames_count (call_frame_t *call_frame)
 call_frame_t *
 create_frame (xlator_t *xl, call_pool_t *pool)
 {
+	// malloc and init stack.and insert to pool->all_frames
+	// return stack->frames not stack;
         call_stack_t    *stack = NULL;
 
         if (!xl || !pool) {

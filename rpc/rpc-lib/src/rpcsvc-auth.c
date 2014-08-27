@@ -457,6 +457,7 @@ err:
 gid_t *
 rpcsvc_auth_unix_auxgids (rpcsvc_request_t *req, int *arrlen)
 {
+	// return req->auxgids[0] ; and get arrlen
         if ((!req) || (!arrlen))
                 return NULL;
 

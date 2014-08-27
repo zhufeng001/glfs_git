@@ -28,6 +28,7 @@
 int
 nfs3_fh_validate (struct nfs3_fh *fh)
 {
+	// check fd->ident
 	if (!fh)
 		return 0;
 
@@ -105,6 +106,7 @@ nfs3_fh_is_root_fh (struct nfs3_fh *fh)
 void
 nfs3_fh_to_str (struct nfs3_fh *fh, char *str)
 {
+	// convert fh's data to str
         char            gfid[512];
         char            exportid[512];
 

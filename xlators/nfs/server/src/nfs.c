@@ -194,6 +194,7 @@ ret:
 int
 nfs_subvolume_started (struct nfs_state *nfs, xlator_t *xl)
 {
+	// if xl in nfs->initedx ,then xl is started ?
         int     x = 0;
         int     started = 0;
 
@@ -407,6 +408,7 @@ err:
 int
 nfs_user_root_create (nfs_user_t *newnfu)
 {
+	// init newnfu
         if (!newnfu)
                 return -1;
 
@@ -422,6 +424,7 @@ int
 nfs_user_create (nfs_user_t *newnfu, uid_t uid, gid_t gid, gid_t *auxgids,
                  int auxcount)
 {
+		// init newnfu and assign auxgids and uid and gid to newnfu;
         int     x = 1;
         int     y = 0;
 
@@ -455,6 +458,7 @@ nfs_user_create (nfs_user_t *newnfu, uid_t uid, gid_t gid, gid_t *auxgids,
 void
 nfs_request_user_init (nfs_user_t *nfu, rpcsvc_request_t *req)
 {
+		// push data from req to nfu;
         gid_t           *gidarr = NULL;
         int             gids = 0;
 
@@ -462,6 +466,7 @@ nfs_request_user_init (nfs_user_t *nfu, rpcsvc_request_t *req)
                 return;
 
         gidarr = rpcsvc_auth_unix_auxgids (req, &gids);
+        // nfu ,uid, gid
         nfs_user_create (nfu, rpcsvc_request_uid (req),
                          rpcsvc_request_gid (req), gidarr, gids);
 

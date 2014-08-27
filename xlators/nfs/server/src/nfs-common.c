@@ -282,6 +282,7 @@ err:
 int
 nfs_root_loc_fill (inode_table_t *itable, loc_t *loc)
 {
+		// inode;
         uuid_t  rootgfid = {0, };
 
         rootgfid[15] = 1;

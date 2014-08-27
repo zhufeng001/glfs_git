@@ -140,6 +140,7 @@ xdr_to_lookup3args (struct iovec inmsg, lookup3args *la)
 ssize_t
 xdr_to_access3args (struct iovec inmsg, access3args *ac)
 {
+		// convert inmsg to ac;
         return xdr_to_generic (inmsg,(void *)ac,
                                    (xdrproc_t)xdr_access3args);
 }

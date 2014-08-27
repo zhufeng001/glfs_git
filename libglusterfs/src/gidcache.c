@@ -16,6 +16,7 @@
  * out after a configurable interval.  Hardly rocket science, but lots of
  * details to worry about.
  */
+// p + n*4
 #define BUCKET_START(p,n)       ((p) + ((n) * AUX_GID_CACHE_ASSOC))
 
 /*
@@ -23,6 +24,7 @@
  */
 int gid_cache_init(gid_cache_t *cache, uint32_t timeout)
 {
+	// set cache - > gc_cache and gc_max_age
 	if (!cache)
 		return -1;
 
@@ -41,6 +43,7 @@ int gid_cache_init(gid_cache_t *cache, uint32_t timeout)
  */
 const gid_list_t *gid_cache_lookup(gid_cache_t *cache, uint64_t id)
 {
+	// find agl in gc_cache by id and now gl_deadline;
 	int bucket;
 	int i;
 	time_t now;
@@ -48,6 +51,11 @@ const gid_list_t *gid_cache_lookup(gid_cache_t *cache, uint64_t id)
 
 	LOCK(&cache->gc_lock);
 	now = time(NULL);
+
+	// get bucket number
+	// start is id
+	// in AUX_GID_CACHE_ASSOC ?
+
 	bucket = id % cache->gc_nbuckets;
 	agl = BUCKET_START(cache->gc_cache, bucket);
 	for (i = 0; i < AUX_GID_CACHE_ASSOC; i++, agl++) {
@@ -81,6 +89,7 @@ const gid_list_t *gid_cache_lookup(gid_cache_t *cache, uint64_t id)
  */
 void gid_cache_release(gid_cache_t *cache, const gid_list_t *agl)
 {
+	// unlock
 	UNLOCK(&cache->gc_lock);
 }
 
@@ -159,6 +168,7 @@ int gid_cache_add(gid_cache_t *cache, gid_list_t *gl)
 	 * If we have evicted an entry, slide the subsequent populated entries
 	 * back and populate the last entry.
 	 */
+	// empty out agl
 	for (; i < AUX_GID_CACHE_ASSOC - 1; i++) {
 		if (!agl[1].gl_list)
 			break;

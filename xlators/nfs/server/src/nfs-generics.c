@@ -45,7 +45,7 @@ nfs_access (xlator_t *nfsx, xlator_t *xl, nfs_user_t *nfu, loc_t *pathloc,
 
         if ((!nfsx) || (!xl) || (!pathloc) || (!nfu))
                 return ret;
-
+        // pathloc, accesstest is args
         ret = nfs_fop_access (nfsx, xl, nfu, pathloc, accesstest, cbk, local);
 
         return ret;

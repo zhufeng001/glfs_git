@@ -538,6 +538,7 @@ nfsstat3_strerror(int stat)
 void
 nfs3_prep_access3args (access3args *args, struct nfs3_fh *fh)
 {
+	// assign fh to args
         memset (args, 0, sizeof (*args));
         args->object.data.data_val = (void *)fh;
 }
@@ -567,6 +568,7 @@ nfs3_accessbits (int32_t accbits)
 uint32_t
 nfs3_request_to_accessbits (int32_t accbits)
 {
+	// check accbits and return acc_request
         uint32_t        acc_request = 0;
 
         if (accbits & ACCESS3_READ)
@@ -1608,6 +1610,7 @@ nfs3_stat_to_errstr (uint32_t xid, char *op, nfsstat3 stat, int pstat,
 void
 nfs3_log_common_call (uint32_t xid, char *op, struct nfs3_fh *fh)
 {
+	// just log fh's data
         char    fhstr[1024];
 
 	if (THIS->ctx->log.loglevel < GF_LOG_DEBUG)
@@ -3744,6 +3747,8 @@ nfs3_fh_resolve_entry (nfs3_call_state_t *cs)
 int
 nfs3_fh_resolve_resume (nfs3_call_state_t *cs)
 {
+	// 避其锋芒。
+
         int     ret = -EFAULT;
 
         if (!cs)

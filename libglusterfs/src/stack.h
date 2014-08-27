@@ -280,6 +280,14 @@ STACK_RESET (call_stack_t *stack)
 
 
 /* make a call with a cookie */
+// create a new frame
+// insert _new to root->frames
+// _new->cookie is cky
+// init _new insert _new to root->frames
+// obj replace THIS
+// execute fn(_new,obj,params)
+// rfn assign to fn_cbk
+
 #define STACK_WIND_COOKIE(frame, rfn, cky, obj, fn, params ...)         \
         do {                                                            \
                 call_frame_t *_new = NULL;                              \
@@ -289,7 +297,7 @@ STACK_RESET (call_stack_t *stack)
                 if (!_new) {                                            \
                         gf_log ("stack", GF_LOG_ERROR, "alloc failed"); \
                         break;                                          \
-                }                                                       \
+                }                   									\
                 typeof(fn##_cbk) tmp_cbk = rfn;                         \
                 _new->root = frame->root;                               \
                 _new->this = obj;                                       \
@@ -380,6 +388,8 @@ STACK_RESET (call_stack_t *stack)
 static inline int
 call_stack_alloc_groups (call_stack_t *stack, int ngrps)
 {
+	// malloc stack->groups and set ngrps;
+	// groups_small ? groups_large?
 	if (ngrps <= SMALL_GROUP_COUNT) {
 		stack->groups = stack->groups_small;
 	} else {

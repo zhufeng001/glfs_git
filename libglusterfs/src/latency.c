@@ -24,6 +24,7 @@
 void
 gf_set_fop_from_fn_pointer (call_frame_t *frame, struct xlator_fops *fops, void *fn)
 {
+		// check fn and cmp with fops then set frame->fop
         glusterfs_fop_t fop = -1;
 
         if (fops->stat == *(fop_stat_t *)&fn)
@@ -139,6 +140,7 @@ gf_update_latency (call_frame_t *frame)
 void
 gf_latency_begin (call_frame_t *frame, void *fn)
 {
+	// set frame-> fop and begin
         gf_set_fop_from_fn_pointer (frame, frame->this->fops, fn);
 
         gettimeofday (&frame->begin, NULL);

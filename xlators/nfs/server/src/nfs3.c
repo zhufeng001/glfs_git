@@ -67,10 +67,12 @@
 struct nfs3_export *
 __nfs3_get_export_by_index (struct nfs3_state *nfs3, uuid_t exportid)
 {
+	// find exp from nfs3->eports by searchindex (exportid) get list number ?
         struct nfs3_export      *exp = NULL;
         int                     index = 0;
         int                     searchindex = 0;
 
+        // get exportid[15]
         searchindex = nfs3_fh_exportid_to_index (exportid);
         list_for_each_entry (exp, &nfs3->exports, explist) {
                 if (searchindex == index)
@@ -89,6 +91,8 @@ found:
 struct nfs3_export *
 __nfs3_get_export_by_volumeid (struct nfs3_state *nfs3, uuid_t exportid)
 {
+	// found exp by cmp exportid
+	// lots of exp in nfs3->exports
         struct nfs3_export      *exp = NULL;
 
         list_for_each_entry (exp, &nfs3->exports, explist) {
@@ -105,11 +109,13 @@ found:
 struct nfs3_export *
 __nfs3_get_export_by_exportid (struct nfs3_state *nfs3, uuid_t exportid)
 {
+	// get exp from nfs3 by exportid
         struct nfs3_export      *exp = NULL;
 
         if (!nfs3)
                 return exp;
-
+        // get nfsx->private
+        // check dynamicvolumes
         if (gf_nfs_dvm_off (nfs_state(nfs3->nfsx)))
                 exp = __nfs3_get_export_by_index (nfs3, exportid);
         else
@@ -154,6 +160,8 @@ err:
 xlator_t *
 nfs3_fh_to_xlator (struct nfs3_state *nfs3, struct nfs3_fh *fh)
 {
+	// get vol by fh->exportid from nfs3;
+
         xlator_t                *vol = NULL;
         struct nfs3_export      *exp = NULL;
 
@@ -173,6 +181,7 @@ out:
 int
 nfs3_is_root_looked_up (struct nfs3_state *nfs3, struct nfs3_fh *rootfh)
 {
+		// return rootlookedup found by exportid in nfs3;
         struct nfs3_export      *exp = NULL;
         int                     ret = 0;
 
@@ -208,12 +217,14 @@ out:
 }
 
 
+// if volume not exist ,go to error
+// req->private = volume (come from nfs3state and handle->exportid)
 #define nfs3_map_fh_to_volume(nfs3state, handle, req, volume, status, label) \
         do {                                                            \
                 char exportid[256], gfid[256];                          \
                 rpc_transport_t *trans = NULL;                          \
                 volume = nfs3_fh_to_xlator ((nfs3state), handle);       \
-                if (!volume) {                                          \
+                if (!volume) {               							\
                         uuid_unparse (handle->exportid, exportid);      \
                         uuid_unparse (handle->gfid, gfid);              \
                         trans = rpcsvc_request_transport (req);         \
@@ -246,6 +257,8 @@ out:
                 }                                                       \
         } while (0)                                                     \
 
+// cst is req
+// check req->resolve_req
 #define nfs3_check_fh_resolve_status(cst, nfstat, erlabl)               \
         do {                                                            \
                 xlator_t *xlatorp = NULL;                               \
@@ -404,6 +417,7 @@ typedef ssize_t (*nfs3_serializer) (struct iovec outmsg, void *args);
 nfs3_call_state_t *
 nfs3_call_state_init (struct nfs3_state *s, rpcsvc_request_t *req, xlator_t *v)
 {
+		// melloc cs init cs by args
         nfs3_call_state_t       *cs = NULL;
 
         GF_VALIDATE_OR_GOTO (GF_NFS3, s, err);
@@ -1528,12 +1542,15 @@ nfs3_access_resume (void *carg)
         nfs_user_t              nfu = {0, };
         nfs3_call_state_t       *cs = NULL;
 
+        // check carg
         GF_VALIDATE_OR_GOTO (GF_NFS3, carg, nfs3err);
 
         cs = (nfs3_call_state_t *)carg;
         nfs3_check_fh_resolve_status (cs, stat, nfs3err);
         cs->fh = cs->resolvefh;
+        // push data from req to nfu;
         nfs_request_user_init (&nfu, cs->req);
+        // lots of cbk !!
         ret = nfs_access (cs->nfsx, cs->vol, &nfu, &cs->resolvedloc,
                           cs->accessbits, nfs3svc_access_cbk, cs);
         if (ret < 0)
@@ -1563,14 +1580,24 @@ nfs3_access (rpcsvc_request_t *req, struct nfs3_fh *fh, uint32_t accbits)
 
         GF_VALIDATE_OR_GOTO (GF_NFS, req, out);
         GF_VALIDATE_OR_GOTO (GF_NFS, fh, out);
+
         nfs3_log_common_call (rpcsvc_request_xid (req), "ACCESS", fh);
+        // check fh;
         nfs3_validate_gluster_fh (fh, stat, nfs3err);
+        // check
         nfs3_validate_nfs3_state (req, nfs3, stat, nfs3err, ret);
+
+        // set req->private to vol
         nfs3_map_fh_to_volume (nfs3, fh, req, vol, stat, nfs3err);
+
+        // vol should started
         nfs3_volume_started_check (nfs3, vol, ret, out);
+
+        // malloc cs and init by nfs3,req,vol
         nfs3_handle_call_state_init (nfs3, cs, req, vol, stat, nfs3err);
         cs->accessbits = accbits;
 
+        // 重中之重了。把inode和frame结合起来了。
         ret = nfs3_fh_resolve_and_resume (cs, fh, NULL, nfs3_access_resume);
         if (ret < 0)
                 stat = nfs3_errno_to_nfsstat3 (-ret);
@@ -1599,6 +1626,7 @@ nfs3svc_access (rpcsvc_request_t *req)
                 return ret;
 
         nfs3_prep_access3args (&args, &fh);
+        // convert req->msg[0] to args
         if (xdr_to_access3args (req->msg[0], &args) <= 0) {
                 gf_log (GF_NFS3, GF_LOG_ERROR, "Error decoding args");
                 rpcsvc_request_seterr (req, GARBAGE_ARGS);

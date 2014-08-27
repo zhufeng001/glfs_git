@@ -106,6 +106,8 @@ nfs_fop_local_wipe (xlator_t *xl, struct nfs_fop_local *l);
 #define nfs_state(nfsxl)        (nfsxl)->private
 #define nfs_fop_mempool(nfxl)   (((struct nfs_state *)nfs_state(nfxl))->foppool)
 
+// malloc nflocal and assign to it; pcbk,plocal,fram
+// cbk set to progcbk
 #define prog_data_to_nfl(nf,nflocal, fram, pcbk, plocal)                \
         do {                                                            \
                 nflocal = nfs_fop_local_init (nf);                      \
@@ -127,6 +129,7 @@ nfs_fop_local_wipe (xlator_t *xl, struct nfs_fop_local *l);
                 pcbk = nflocal->progcbk;                                \
         } while (0)                                                     \
 
+// malloc nfloc
 #define nfs_fop_handle_local_init(fram,nfx, nfloc, cbck,prgloc,retval,lab)  \
         do {                                                                \
                 prog_data_to_nfl (nfx, nfloc, fram, cbck, prgloc);      \
