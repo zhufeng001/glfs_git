@@ -532,6 +532,7 @@ xlator_tree_free (xlator_t *tree)
 void
 loc_wipe (loc_t *loc)
 {
+	// clear loc to 0;
         if (loc->inode) {
                 inode_unref (loc->inode);
                 loc->inode = NULL;

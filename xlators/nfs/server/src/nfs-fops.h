@@ -130,6 +130,7 @@ nfs_fop_local_wipe (xlator_t *xl, struct nfs_fop_local *l);
         } while (0)                                                     \
 
 // malloc nfloc
+// cbk set to nfl->progcbk
 #define nfs_fop_handle_local_init(fram,nfx, nfloc, cbck,prgloc,retval,lab)  \
         do {                                                                \
                 prog_data_to_nfl (nfx, nfloc, fram, cbck, prgloc);      \

@@ -37,6 +37,7 @@
 
 void uuid_pack(const struct uuid *uu, uuid_t ptr)
 {
+	// cp uu->node to ptr
 	uint32_t	tmp;
 	unsigned char	*out = ptr;
 

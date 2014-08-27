@@ -228,6 +228,7 @@ err:
 }
 
 // cp nfuser's data to fram->root
+// fram = xla && nfuser
 #define nfs_fop_handle_frame_create(fram, xla, nfuser, retval, errlabel)      \
         do {                                                                  \
                 fram = nfs_create_frame (xla, (nfuser));                \
@@ -323,6 +324,7 @@ err:
 dict_t *
 nfs_gfid_dict (inode_t *inode)
 {
+	// create and return dictgfid and set key gfid-req to gfid;
         uuid_t  newgfid = {0, };
         char    *dyngfid = NULL;
         dict_t  *dictgfid = NULL;
@@ -330,8 +332,10 @@ nfs_gfid_dict (inode_t *inode)
         uuid_t  rootgfid = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
         dyngfid = GF_CALLOC (1, sizeof (uuid_t), gf_common_mt_char);
+        // get new gfid
         uuid_generate (newgfid);
-
+        // check inode is root ?
+        // dyngfid is rootgfid or newgfid
         if (uuid_compare (inode->gfid, rootgfid) == 0)
                 memcpy (dyngfid, rootgfid, sizeof (uuid_t));
         else
@@ -353,6 +357,7 @@ out:
         return dictgfid;
 }
 
+// create nflcl->dictgfid (check inode->gfid)
 #define nfs_fop_gfid_setup(nflcl, inode, retval, erlbl)                 \
         do {                                                            \
                 if (nflcl) {                                            \
@@ -438,11 +443,14 @@ nfs_fop_lookup (xlator_t *nfsx, xlator_t *xl, nfs_user_t *nfu, loc_t *loc,
                 return ret;
 
         gf_log (GF_NFS, GF_LOG_TRACE, "Lookup: %s", loc->path);
+
         nfs_fop_handle_frame_create (frame, nfsx, nfu, ret, err);
+        // cbk set to nfl->progcbk
         nfs_fop_handle_local_init (frame, nfsx, nfl, cbk, local, ret, err);
         nfs_fop_save_root_ino (nfl, loc);
+        // create nfl->dictgfid
         nfs_fop_gfid_setup (nfl, loc->inode, ret, err);
-
+        // exeute lookup ??
         STACK_WIND_COOKIE (frame, nfs_fop_lookup_cbk, xl, xl,
                            xl->fops->lookup, loc, nfl->dictgfid);
 

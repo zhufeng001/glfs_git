@@ -150,11 +150,12 @@ nfs_loc_copy (loc_t *dst, loc_t *src)
 int
 nfs_loc_fill (loc_t *loc, inode_t *inode, inode_t *parent, char *path)
 {
+		// set loc's inode,parent,path,name by args;
         int     ret = -EFAULT;
 
         if (!loc)
                 return ret;
-
+        // cp inode's gfid to loc
         if (inode) {
                 loc->inode = inode_ref (inode);
                 if (!uuid_is_null (inode->gfid))
@@ -187,6 +188,8 @@ loc_wipe:
 int
 nfs_inode_loc_fill (inode_t *inode, loc_t *loc, int how)
 {
+	// from inode get path,get parent inode
+
         char            *resolvedpath = NULL;
         inode_t         *parent = NULL;
         int             ret = -EFAULT;
@@ -218,7 +221,7 @@ nfs_inode_loc_fill (inode_t *inode, loc_t *loc, int how)
         } else {
                 parent = inode_parent (inode, loc->pargfid, NULL);
         }
-
+        // set args to loc
         ret = nfs_loc_fill (loc, inode, parent, resolvedpath);
         if (ret < 0) {
                 gf_log (GF_NFS, GF_LOG_ERROR, "loc fill resolution failed %s",
@@ -239,12 +242,14 @@ err:
 int
 nfs_gfid_loc_fill (inode_table_t *itable, uuid_t gfid, loc_t *loc, int how)
 {
+	// set loc'gfid by args
+	// set loc's members
         int             ret = -EFAULT;
         inode_t         *inode = NULL;
 
         if (!loc)
                 return ret;
-
+        // find inode and create ; or create a new inode;
         inode = inode_find (itable, gfid);
         if (!inode) {
 		gf_log (GF_NFS, GF_LOG_TRACE, "Inode not found in itable, will try to create one.");
@@ -285,7 +290,9 @@ err:
 int
 nfs_root_loc_fill (inode_table_t *itable, loc_t *loc)
 {
+		// set loc's members
 		// inode;
+	// gfid is 1?;
         uuid_t  rootgfid = {0, };
 
         rootgfid[15] = 1;

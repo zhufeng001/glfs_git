@@ -52,6 +52,8 @@ fd_dump (struct list_head *head, char *prefix);
 static int
 hash_dentry (inode_t *parent, const char *name, int mod)
 {
+	// mod is hashsize
+	// get dentry hash by name ??
         int hash = 0;
         int ret = 0;
 
@@ -81,6 +83,7 @@ hash_gfid (uuid_t uuid, int mod)
 static void
 __dentry_hash (dentry_t *dentry)
 {
+	// cal hash of dentry by name and parent; and delete from prev hash list and insert to table->name_hash;
         inode_table_t   *table = NULL;
         int              hash = 0;
 
@@ -114,6 +117,7 @@ __is_dentry_hashed (dentry_t *dentry)
 static void
 __dentry_unhash (dentry_t *dentry)
 {
+	// delete from dentry->hash list;
         if (!dentry) {
                 gf_log_callingfn (THIS->name, GF_LOG_WARNING, "dentry not found");
                 return;
@@ -126,12 +130,14 @@ __dentry_unhash (dentry_t *dentry)
 static void
 __dentry_unset (dentry_t *dentry)
 {
+	// from dentry and delete from list;
         if (!dentry) {
                 gf_log_callingfn (THIS->name, GF_LOG_WARNING, "dentry not found");
                 return;
         }
 
         __dentry_unhash (dentry);
+        // delete from inode_list;
 
         list_del_init (&dentry->inode_list);
 
@@ -152,6 +158,7 @@ __foreach_ancestor_dentry (dentry_t *dentry,
                                                 void *data),
                            void *data)
 {
+	// per_dentry_fn(parent->dentry ,inode)
 		//对祖先来一遍过滤.
         inode_t  *parent = NULL;
         dentry_t *each = NULL;
@@ -187,6 +194,7 @@ out:
 static int
 __check_cycle (dentry_t *a_dentry, void *data)
 {
+	// check if dentry's parent is link_inode (data)
         inode_t *link_inode = NULL;
 
         link_inode = data;
@@ -208,6 +216,7 @@ __is_dentry_cyclic (dentry_t *dentry)
         ret = __foreach_ancestor_dentry (dentry, __check_cycle,
                                          dentry->inode);
         if (ret) {
+        	// exists dentry->parent equal link_node;
                 inode = dentry->inode;
 
                 if (dentry->name)
@@ -236,6 +245,7 @@ __inode_unhash (inode_t *inode)
 
 
 static int
+// check inode->hash list;
 __is_inode_hashed (inode_t *inode)
 {
         if (!inode) {
@@ -257,7 +267,9 @@ __inode_hash (inode_t *inode)
                 gf_log_callingfn (THIS->name, GF_LOG_WARNING, "inode not found");
                 return;
         }
-
+        // cal hash by gfid ;
+        // insert inode to inode'table->inode_hash
+        // inode->table
         table = inode->table;
         hash = hash_gfid (inode->gfid, 65536);
 
@@ -476,6 +488,8 @@ inode_ref (inode_t *inode)
 static dentry_t *
 __dentry_create (inode_t *inode, inode_t *parent, const char *name)
 {
+	// malloc new dentry ;and init member inode,parent ,name;
+	// add to inode->dentry_list;
         dentry_t      *newd = NULL;
 
         if (!inode || !parent || !name) {
@@ -519,7 +533,9 @@ __inode_create (inode_table_t *table)
                 gf_log_callingfn (THIS->name, GF_LOG_WARNING, "table not found");
                 return NULL;
         }
-
+        // malloc newi
+        // melloc newi->_ctx and insert newi to table->lru;
+        // fd_list ? dentry_list ?
         newi = mem_get0 (table->inode_pool);
         if (!newi) {
                 goto out;
@@ -556,6 +572,7 @@ out:
 inode_t *
 inode_new (inode_table_t *table)
 {
+	// create new inode ; malloc and init
         inode_t *inode = NULL;
 
         if (!table) {
@@ -608,6 +625,7 @@ __inode_forget (inode_t *inode, uint64_t nlookup)
 dentry_t *
 __dentry_grep (inode_table_t *table, inode_t *parent, const char *name)
 {
+	// find dentry by name'hash and parent inode;
         int       hash = 0;
         dentry_t *dentry = NULL;
         dentry_t *tmp = NULL;
@@ -617,6 +635,7 @@ __dentry_grep (inode_table_t *table, inode_t *parent, const char *name)
 
         hash = hash_dentry (parent, name, table->hashsize);
 
+        // name_hash ?
         list_for_each_entry (tmp, &table->name_hash[hash], hash) {
                 if (tmp->parent == parent && !strcmp (tmp->name, name)) {
                         dentry = tmp;
@@ -808,6 +827,7 @@ static inode_t *
 __inode_link (inode_t *inode, inode_t *parent, const char *name,
               struct iatt *iatt)
 {
+	// get link_node ;(which is inode or old_inode)
         dentry_t      *dentry = NULL;
         dentry_t      *old_dentry = NULL;
         inode_t       *old_inode = NULL;
@@ -831,25 +851,27 @@ __inode_link (inode_t *inode, inode_t *parent, const char *name,
         }
 
         link_inode = inode;
-
+        // hash list is empty
         if (!__is_inode_hashed (inode)) {
                 if (!iatt)
                         return NULL;
 
                 if (uuid_is_null (iatt->ia_gfid))
                         return NULL;
-
+                //
                 old_inode = __inode_find (table, iatt->ia_gfid);
 
                 if (old_inode) {
+                	// find old_inode and assign to link_inode by iatt->ia_gfid
                         link_inode = old_inode;
                 } else {
+                	// else hash inode;
                         uuid_copy (inode->gfid, iatt->ia_gfid);
                         inode->ia_type    = iatt->ia_type;
                         __inode_hash (inode);
                 }
         }
-
+        // check name and . ' ..
         if (name) {
                 if (!strcmp(name, ".") || !strcmp(name, ".."))
                         return link_inode;
@@ -1279,7 +1301,7 @@ inode_table_prune (inode_table_t *table)
         {
                 while (table->lru_limit
                        && table->lru_size > (table->lru_limit)) {
-
+                		// get enry of inode_t
                         entry = list_entry (table->lru.next, inode_t, list);
 
                         table->lru_size--;

@@ -3588,6 +3588,7 @@ nfs3_fh_resolve_inode_lookup_cbk (call_frame_t *frame, void *cookie,
         nfs3_call_state_t       *cs = NULL;
         inode_t                 *linked_inode = NULL;
 
+        // frame's root and frame's local ?
         cs = frame->local;
         cs->resolve_ret = op_ret;
         cs->resolve_errno = op_errno;
@@ -3596,10 +3597,11 @@ nfs3_fh_resolve_inode_lookup_cbk (call_frame_t *frame, void *cookie,
                 gf_log (GF_NFS3, (op_errno == ENOENT ? GF_LOG_TRACE : GF_LOG_ERROR),
                         "Lookup failed: %s: %s",
                         cs->resolvedloc.path, strerror (op_errno));
+                // excute cs->resume_fn
                 nfs3_call_resume (cs);
                 goto err;
         }
-
+       // cp  buf to cs'stbuf and cs'postparent
 	memcpy (&cs->stbuf, buf, sizeof(*buf));
 	memcpy (&cs->postparent, buf, sizeof(*postparent));
         linked_inode = inode_link (inode, cs->resolvedloc.parent,
@@ -3640,6 +3642,7 @@ nfs3_fh_resolve_inode_hard (nfs3_call_state_t *cs)
         gf_log (GF_NFS3, GF_LOG_TRACE, "FH hard resolution for: gfid 0x%s",
                 uuid_utoa (cs->resolvefh.gfid));
 	cs->hardresolved = 1;
+	// clear to 0;
         nfs_loc_wipe (&cs->resolvedloc);
         ret = nfs_gfid_loc_fill (cs->vol->itable, cs->resolvefh.gfid,
                                  &cs->resolvedloc, NFS_RESOLVE_CREATE);
@@ -3819,6 +3822,8 @@ nfs3_fh_resolve_root (nfs3_call_state_t *cs)
 
         nfs_user_root_create (&nfu);
         gf_log (GF_NFS3, GF_LOG_TRACE, "Root needs lookup");
+
+        // set cs->resolvedloc's members
         ret = nfs_root_loc_fill (cs->vol->itable, &cs->resolvedloc);
 	if (ret < 0) {
 		gf_log (GF_NFS3, GF_LOG_ERROR, "Failed to lookup root from itable: %s",

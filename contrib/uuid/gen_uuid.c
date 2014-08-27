@@ -141,6 +141,8 @@ static int getuid (void)
 
 static int get_random_fd(void)
 {
+	// srand and rand ?
+	// return fd
 	struct timeval	tv;
 	static int	fd = -2;
 	int		i;
@@ -148,6 +150,7 @@ static int get_random_fd(void)
 	if (fd == -2) {
 		gettimeofday(&tv, 0);
 #ifndef _WIN32
+		// set fd
 		fd = open("/dev/urandom", O_RDONLY);
 		if (fd == -1)
 			fd = open("/dev/random", O_RDONLY | O_NONBLOCK);
@@ -178,6 +181,7 @@ static int get_random_fd(void)
  */
 static void get_random_bytes(void *buf, int nbytes)
 {
+	// get buf; read from fd;
 	int i, n = nbytes, fd = get_random_fd();
 	int lose_counter = 0;
 	unsigned char *cp = (unsigned char *) buf;
@@ -634,6 +638,7 @@ void uuid_generate_time(uuid_t out)
 
 void uuid__generate_random(uuid_t out, int *num)
 {
+	//  get out
 	uuid_t	buf;
 	struct uuid uu;
 	int i, n;
@@ -645,11 +650,13 @@ void uuid__generate_random(uuid_t out, int *num)
 
 	for (i = 0; i < n; i++) {
 		get_random_bytes(buf, sizeof(buf));
+		// cp buf to uu;
 		uuid_unpack(buf, &uu);
 
 		uu.clock_seq = (uu.clock_seq & 0x3FFF) | 0x8000;
 		uu.time_hi_and_version = (uu.time_hi_and_version & 0x0FFF)
 			| 0x4000;
+		// cp uu to out
 		uuid_pack(&uu, out);
 		out += sizeof(uuid_t);
 	}
@@ -657,6 +664,7 @@ void uuid__generate_random(uuid_t out, int *num)
 
 void uuid_generate_random(uuid_t out)
 {
+	// generate val to out;
 	int	num = 1;
 	/* No real reason to use the daemon for random uuid's -- yet */
 

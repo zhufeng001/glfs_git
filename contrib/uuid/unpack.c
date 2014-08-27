@@ -37,6 +37,7 @@
 
 void uuid_unpack(const uuid_t in, struct uuid *uu)
 {
+	// cp in to uu;
 	const uint8_t	*ptr = in;
 	uint32_t		tmp;
 
@@ -58,6 +59,7 @@ void uuid_unpack(const uuid_t in, struct uuid *uu)
 	tmp = (tmp << 8) | *ptr++;
 	uu->clock_seq = tmp;
 
+	// cp ptr to uu->node;
 	memcpy(uu->node, ptr, 6);
 }
 
