@@ -109,7 +109,7 @@ found:
 struct nfs3_export *
 __nfs3_get_export_by_exportid (struct nfs3_state *nfs3, uuid_t exportid)
 {
-	// get exp from nfs3 by exportid
+	// get exp from nfs3->exports by exportid
         struct nfs3_export      *exp = NULL;
 
         if (!nfs3)
@@ -160,7 +160,7 @@ err:
 xlator_t *
 nfs3_fh_to_xlator (struct nfs3_state *nfs3, struct nfs3_fh *fh)
 {
-	// get vol by fh->exportid from nfs3;
+	// get vol by fh->exportid from nfs3->exports;
 
         xlator_t                *vol = NULL;
         struct nfs3_export      *exp = NULL;
@@ -172,6 +172,8 @@ nfs3_fh_to_xlator (struct nfs3_state *nfs3, struct nfs3_fh *fh)
         if (!exp)
                 goto out;
 
+        // xlator and nfs3_export
+        // vol = exp->subvol;
         vol = exp->subvol;
 out:
         return vol;
@@ -220,6 +222,7 @@ out:
 
 // if volume not exist ,go to error
 // req->private = volume (come from nfs3state and handle->exportid)
+// req->private is volume (xlator) (exp->subvol)
 #define nfs3_map_fh_to_volume(nfs3state, handle, req, volume, status, label) \
         do {                                                            \
                 char exportid[256], gfid[256];                          \
@@ -247,6 +250,7 @@ out:
         } while (0);                                                    \
 
 
+// just check
 #define nfs3_validate_gluster_fh(handle, status, errlabel)              \
         do {                                                            \
                 if ((handle)) {                                         \
@@ -419,6 +423,8 @@ nfs3_call_state_t *
 nfs3_call_state_init (struct nfs3_state *s, rpcsvc_request_t *req, xlator_t *v)
 {
 		// melloc cs init cs by args
+		// vol req nfs3state
+
         nfs3_call_state_t       *cs = NULL;
 
         GF_VALIDATE_OR_GOTO (GF_NFS3, s, err);
@@ -476,7 +482,8 @@ nfs3_call_state_wipe (nfs3_call_state_t *cs)
         /* Already refd by fd_lookup, so no need to ref again. */
 }
 
-
+// cs nfs3_call_state
+// s nfs3state
 #define nfs3_handle_call_state_init(nfs3state, calls, rq, vl ,opstat, errlabel)\
         do {                                                            \
                 calls = nfs3_call_state_init ((nfs3state), (rq), (vl)); \
@@ -2652,13 +2659,29 @@ nfs3_create (rpcsvc_request_t *req, struct nfs3_fh *dirfh, char *name,
         if ((!req) || (!dirfh) || (!name) || (!sattr))
                 return -1;
         // get req->xid
+        // just for log
         nfs3_log_create_call (rpcsvc_request_xid (req), dirfh, name, mode);
+
+        // just check
         nfs3_validate_gluster_fh (dirfh, stat, nfs3err);
+
+        // nfs3 = req->prog->private
         nfs3_validate_nfs3_state (req, nfs3, stat, nfs3err, ret);
+
+        // check strlen(name)
         nfs3_validate_strlen_or_goto (name, NFS_NAME_MAX, nfs3err, stat, ret);
+
+        // vol is xlator ?
+        // dirfh(handle) (exportid,gfid)
+        // req->private = vol
         nfs3_map_fh_to_volume (nfs3, dirfh, req, vol, stat, nfs3err);
+
+
         nfs3_volume_started_check (nfs3, vol, ret, out);
         nfs3_check_rw_volaccess (nfs3, dirfh->exportid, stat, nfs3err);
+
+        // create cs
+        // nfs3 is s;
         nfs3_handle_call_state_init (nfs3, cs, req, vol, stat, nfs3err);
 
         cs->cookieverf = cverf;

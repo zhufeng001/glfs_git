@@ -115,7 +115,7 @@ DECLARE_INIT_OPT(xlator_t *, xlator);
 DECLARE_INIT_OPT(char *, path);
 DECLARE_INIT_OPT(double, double);
 
-
+// use set_value or default_value ?
 #define DEFINE_INIT_OPT(type_t, type, conv)                             \
 int                                                                     \
 xlator_option_init_##type (xlator_t *this, dict_t *options, char *key,  \

@@ -248,6 +248,7 @@ struct rpcsvc_request {
 // get prog from req
 #define rpcsvc_request_program(req) ((rpcsvc_program_t *)((req)->prog))
 #define rpcsvc_request_procnum(req) (((req)->procnum))
+// get private from req->prog
 #define rpcsvc_request_program_private(req) (((rpcsvc_program_t *)((req)->prog))->private)
 #define rpcsvc_request_accepted(req)    ((req)->rpc_status == MSG_ACCEPTED)
 #define rpcsvc_request_accepted_success(req) ((req)->rpc_err == SUCCESS)

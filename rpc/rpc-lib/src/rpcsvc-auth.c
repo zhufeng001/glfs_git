@@ -27,6 +27,7 @@ int
 rpcsvc_auth_add_initer (struct list_head *list, char *idfier,
                         rpcsvc_auth_initer_t init)
 {
+	// malloc new ; and init init ; insert to list;
         struct rpcsvc_auth_list         *new = NULL;
 
         if ((!list) || (!init) || (!idfier))
@@ -50,7 +51,7 @@ int
 rpcsvc_auth_add_initers (rpcsvc_t *svc)
 {
         int     ret = -1;
-
+        // append svn->authschemes
         ret = rpcsvc_auth_add_initer (&svc->authschemes, "auth-glusterfs",
                                       (rpcsvc_auth_initer_t)
                                       rpcsvc_auth_glusterfs_init);
@@ -95,6 +96,7 @@ int
 rpcsvc_auth_init_auth (rpcsvc_t *svc, dict_t *options,
                        struct rpcsvc_auth_list *authitem)
 {
+	// execut authitem's init in svc->authitem
         int             ret = -1;
 
         if ((!svc) || (!options) || (!authitem))
@@ -127,6 +129,7 @@ err:
 int
 rpcsvc_auth_init_auths (rpcsvc_t *svc, dict_t *options)
 {
+	// set options's value
         int                     ret = -1;
         struct rpcsvc_auth_list *auth = NULL;
         struct rpcsvc_auth_list *tmp = NULL;
@@ -180,6 +183,7 @@ err:
 int
 rpcsvc_set_allow_insecure (rpcsvc_t *svc, dict_t *options)
 {
+	// set svc->allow_insecure
         int             ret = -1;
         char            *allow_insecure_str = NULL;
         gf_boolean_t    is_allow_insecure = _gf_false;
@@ -206,6 +210,7 @@ rpcsvc_set_allow_insecure (rpcsvc_t *svc, dict_t *options)
 int
 rpcsvc_set_root_squash (rpcsvc_t *svc, dict_t *options)
 {
+	// set svc->root_squash
         int  ret = -1;
 
         GF_ASSERT (svc);
@@ -226,6 +231,7 @@ rpcsvc_set_root_squash (rpcsvc_t *svc, dict_t *options)
 int
 rpcsvc_auth_init (rpcsvc_t *svc, dict_t *options)
 {
+	// execute auth->init;
         int             ret = -1;
 
         if ((!svc) || (!options))

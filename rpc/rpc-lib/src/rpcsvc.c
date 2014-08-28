@@ -1638,6 +1638,7 @@ out:
 inline int
 rpcsvc_program_register (rpcsvc_t *svc, rpcsvc_program_t *program)
 {
+	// insert proram(newprog) to svc->programs;
         int               ret                = -1;
         rpcsvc_program_t *newprog            = NULL;
         char              already_registered = 0;
@@ -1788,6 +1789,7 @@ sendrsp:
 int
 rpcsvc_init_options (rpcsvc_t *svc, dict_t *options)
 {
+	// init svc's member from options;
         char            *optstr = NULL;
         int             ret = -1;
 
@@ -1875,6 +1877,8 @@ rpcsvc_t *
 rpcsvc_init (xlator_t *xl, glusterfs_ctx_t *ctx, dict_t *options,
              uint32_t poolcount)
 {
+	// malloc svc and init svc's members
+	// svc->mydata is xl
         rpcsvc_t          *svc              = NULL;
         int                ret              = -1;
 

@@ -44,6 +44,7 @@
 int
 nfs_add_initer (struct list_head *list, nfs_version_initer_t init)
 {
+	// malloc new and init member init insert to list;
         struct nfs_initer_list  *new = NULL;
         if ((!list) || (!init))
                 return -1;
@@ -145,6 +146,7 @@ err:
 int
 nfs_add_all_initiators (struct nfs_state *nfs)
 {
+	// append new to nfs->versions;
         int     ret = 0;
 
         /* Add the initializers for all versions. */
@@ -513,6 +515,9 @@ mem_acct_init (xlator_t *this)
 struct nfs_state *
 nfs_init_state (xlator_t *this)
 {
+	// malloc nfs and init nfs's
+	// convert from this->options to nfs's members
+
         struct nfs_state        *nfs = NULL;
         int                     ret = -1;
         unsigned int            fopspoolsize = 0;
@@ -738,6 +743,9 @@ nfs_init_state (xlator_t *this)
                 }
         }
 
+        // key ,val,type,err_label
+        // xlator_option_init_bool
+        // nfs->server_aux_gids is set value or default value ?
         GF_OPTION_INIT (OPT_SERVER_AUX_GIDS, nfs->server_aux_gids,
                         bool, free_foppool);
         GF_OPTION_INIT (OPT_SERVER_GID_CACHE_TIMEOUT, nfs->server_aux_gids_max_age,
@@ -761,6 +769,9 @@ nfs_init_state (xlator_t *this)
                 goto free_foppool;
         }
 
+        // this->private is nfs;
+        // nfs->svc
+        // nfs->rpcsvc
         this->private = (void *)nfs;
         INIT_LIST_HEAD (&nfs->versions);
         nfs->generation = 1965;

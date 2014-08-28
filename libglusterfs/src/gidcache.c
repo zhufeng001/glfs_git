@@ -24,6 +24,7 @@
  */
 int gid_cache_init(gid_cache_t *cache, uint32_t timeout)
 {
+	// malloc cache and cache->gc_cache
 	// set cache - > gc_cache and gc_max_age
 	if (!cache)
 		return -1;

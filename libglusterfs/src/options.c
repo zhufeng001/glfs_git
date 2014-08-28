@@ -765,6 +765,7 @@ volume_option_t *
 xlator_volume_option_get_list (volume_opt_list_t *vol_list, const char *key)
 {
 		// get opt[index] from given_opt by key
+
         volume_option_t         *opt = NULL;
         volume_opt_list_t       *opt_list = NULL;
         volume_option_t         *found = NULL;
@@ -799,6 +800,7 @@ out:
 volume_option_t *
 xlator_volume_option_get (xlator_t *xl, const char *key)
 {
+	// get volume_option from xl->volume_options by key
         volume_opt_list_t       *vol_list = NULL;
         volume_option_t         *found = NULL;
 
