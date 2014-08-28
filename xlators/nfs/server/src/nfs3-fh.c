@@ -106,7 +106,7 @@ nfs3_fh_is_root_fh (struct nfs3_fh *fh)
 void
 nfs3_fh_to_str (struct nfs3_fh *fh, char *str)
 {
-	// convert fh's data to str
+	// convert fh's data to str; gfid and exportid
         char            gfid[512];
         char            exportid[512];
 
@@ -178,5 +178,6 @@ nfs3_fh_build_child_fh (struct nfs3_fh *parent, struct iatt *newstat,
 uint32_t
 nfs3_fh_compute_size (struct nfs3_fh *fh)
 {
+	// return size
         return GF_NFSFH_STATIC_SIZE;
 }

@@ -446,6 +446,7 @@ err:
 void
 nfs3_call_state_wipe (nfs3_call_state_t *cs)
 {
+	// free cs;
         if (!cs)
                 return;
 
@@ -2363,6 +2364,7 @@ nfs3_create_reply (rpcsvc_request_t *req, nfsstat3 stat, struct nfs3_fh *newfh,
                    struct iatt *newbuf, struct iatt *preparent,
                    struct iatt *postparent)
 {
+	// convert args to req and submit
         create3res      res = {0, };
         uint64_t        deviceid = 0;
 
@@ -2380,6 +2382,8 @@ nfs3svc_create_setattr_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                             int32_t op_ret, int32_t op_errno,
                             struct iatt *preop, struct iatt *postop, dict_t *xdata)
 {
+	// free frame->local
+
         nfsstat3                stat = NFS3ERR_SERVERFAULT;
         nfs3_call_state_t       *cs = NULL;
 
@@ -2398,6 +2402,7 @@ nfs3err:
                             op_errno, &cs->fh);
         nfs3_create_reply (cs->req, stat, &cs->fh, postop, &cs->preparent,
                            &cs->postparent);
+        // free cs;
         nfs3_call_state_wipe (cs);
 
         return 0;
@@ -2636,6 +2641,8 @@ int
 nfs3_create (rpcsvc_request_t *req, struct nfs3_fh *dirfh, char *name,
              createmode3 mode, sattr3 *sattr, uint64_t cverf)
 {
+	// convert args to cs;
+
         xlator_t                        *vol = NULL;
         nfsstat3                        stat = NFS3ERR_SERVERFAULT;
         int                             ret = -EFAULT;
@@ -2644,7 +2651,7 @@ nfs3_create (rpcsvc_request_t *req, struct nfs3_fh *dirfh, char *name,
 
         if ((!req) || (!dirfh) || (!name) || (!sattr))
                 return -1;
-
+        // get req->xid
         nfs3_log_create_call (rpcsvc_request_xid (req), dirfh, name, mode);
         nfs3_validate_gluster_fh (dirfh, stat, nfs3err);
         nfs3_validate_nfs3_state (req, nfs3, stat, nfs3err, ret);
@@ -2693,8 +2700,9 @@ nfs3svc_create (rpcsvc_request_t *req)
 
         if (!req)
                 return ret;
-
+        // cp req->msg[0] to args;
         nfs3_prep_create3args (&args, &dirfh, name);
+        // convert xdr inmsg to rags
         if (xdr_to_create3args (req->msg[0], &args) <= 0) {
                 gf_log (GF_NFS3, GF_LOG_ERROR, "Error decoding args");
                 rpcsvc_request_seterr (req, GARBAGE_ARGS);
@@ -2709,7 +2717,7 @@ nfs3svc_create (rpcsvc_request_t *req)
                        "Error getting createverf3 from args");
                 goto rpcerr;
         }
-
+        // args come from req's xdr;
         ret = nfs3_create (req, &dirfh, name, args.how.mode,
                            &args.how.createhow3_u.obj_attributes, cverf);
         if ((ret < 0) && (ret != RPCSVC_ACTOR_IGNORE)) {

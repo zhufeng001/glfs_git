@@ -114,6 +114,7 @@ nfs_mntpath_to_xlator (xlator_list_t *cl, char *path)
 int
 nfs_zero_filled_stat (struct iatt *buf)
 {
+	// check buf->ia_nlink ia_ctime
         if (!buf)
                 return 1;
 

@@ -215,18 +215,18 @@ xdr_serialize_write3res (struct iovec outmsg, write3res *res)
                                           (xdrproc_t)xdr_write3res);
 }
 
-
 ssize_t
 xdr_to_create3args (struct iovec inmsg, create3args *ca)
 {
+	// create from args;
         return xdr_to_generic (inmsg, (void *)ca,
                                    (xdrproc_t)xdr_create3args);
 }
 
-
 ssize_t
 xdr_serialize_create3res (struct iovec outmsg, create3res *res)
 {
+	// create fro res;
         return xdr_serialize_generic (outmsg, (void *)res,
                                           (xdrproc_t)xdr_create3res);
 }

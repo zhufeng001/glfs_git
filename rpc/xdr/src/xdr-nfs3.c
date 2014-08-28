@@ -202,6 +202,8 @@ xdr_nfstime3 (XDR *xdrs, nfstime3 *objp)
 bool_t
 xdr_fattr3 (XDR *xdrs, fattr3 *objp)
 {
+	// get type,mode,nlink,uid,gid,
+
 	 if (!xdr_ftype3 (xdrs, &objp->type))
 		 return FALSE;
 	 if (!xdr_mode3 (xdrs, &objp->mode))
@@ -252,6 +254,7 @@ xdr_post_op_attr (XDR *xdrs, post_op_attr *objp)
 bool_t
 xdr_wcc_attr (XDR *xdrs, wcc_attr *objp)
 {
+	// get size,mtime,ctime
 	 if (!xdr_size3 (xdrs, &objp->size))
 		 return FALSE;
 	 if (!xdr_nfstime3 (xdrs, &objp->mtime))
@@ -264,10 +267,13 @@ xdr_wcc_attr (XDR *xdrs, wcc_attr *objp)
 bool_t
 xdr_pre_op_attr (XDR *xdrs, pre_op_attr *objp)
 {
+	// get attributes_follow
+
 	 if (!xdr_bool (xdrs, &objp->attributes_follow))
 		 return FALSE;
 	switch (objp->attributes_follow) {
 	case TRUE:
+		// get attributes
 		 if (!xdr_wcc_attr (xdrs, &objp->pre_op_attr_u.attributes))
 			 return FALSE;
 		break;
@@ -282,6 +288,7 @@ xdr_pre_op_attr (XDR *xdrs, pre_op_attr *objp)
 bool_t
 xdr_wcc_data (XDR *xdrs, wcc_data *objp)
 {
+	// get before
 	 if (!xdr_pre_op_attr (xdrs, &objp->before))
 		 return FALSE;
 	 if (!xdr_post_op_attr (xdrs, &objp->after))
@@ -849,6 +856,7 @@ xdr_createmode3 (XDR *xdrs, createmode3 *objp)
 bool_t
 xdr_createhow3 (XDR *xdrs, createhow3 *objp)
 {
+	// get mode,obj_attributes,verf;
 	 if (!xdr_createmode3 (xdrs, &objp->mode))
 		 return FALSE;
 	switch (objp->mode) {
@@ -870,6 +878,7 @@ xdr_createhow3 (XDR *xdrs, createhow3 *objp)
 bool_t
 xdr_create3args (XDR *xdrs, create3args *objp)
 {
+	// get where and how;
 	 if (!xdr_diropargs3 (xdrs, &objp->where))
 		 return FALSE;
 	 if (!xdr_createhow3 (xdrs, &objp->how))
@@ -880,6 +889,7 @@ xdr_create3args (XDR *xdrs, create3args *objp)
 bool_t
 xdr_create3resok (XDR *xdrs, create3resok *objp)
 {
+	// get obj,obj_attributes,dir_wcc;
 	 if (!xdr_post_op_fh3 (xdrs, &objp->obj))
 		 return FALSE;
 	 if (!xdr_post_op_attr (xdrs, &objp->obj_attributes))
@@ -904,6 +914,7 @@ xdr_create3res (XDR *xdrs, create3res *objp)
 		 return FALSE;
 	switch (objp->status) {
 	case NFS3_OK:
+		// get resok
 		 if (!xdr_create3resok (xdrs, &objp->create3res_u.resok))
 			 return FALSE;
 		break;

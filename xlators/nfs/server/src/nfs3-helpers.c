@@ -115,6 +115,7 @@ hashout:
 void
 nfs3_map_deviceid_to_statdev (struct iatt *ia, uint64_t deviceid)
 {
+	// set ia->ia_dev
         if (!ia)
                 return;
 
@@ -274,6 +275,8 @@ nfs3_fill_lookup3res_error (lookup3res *res, nfsstat3 stat,
 fattr3
 nfs3_stat_to_fattr3 (struct iatt *buf)
 {
+	// malloc fa ; and init fa by buf
+	// where fa go to ?
         fattr3          fa = {0, };
 
         if (IA_ISDIR (buf->ia_type))
@@ -352,6 +355,8 @@ nfs3_stat_to_fattr3 (struct iatt *buf)
 post_op_attr
 nfs3_stat_to_post_op_attr (struct iatt *buf)
 {
+	// malloc and init attr by buf
+	// where attr go to ?
         post_op_attr    attr = {0, };
         if (!buf)
                 return attr;
@@ -698,6 +703,8 @@ err:
 void
 nfs3_fill_post_op_fh3 (struct nfs3_fh *fh, post_op_fh3 *pfh)
 {
+	// cp date from fh to pfh;
+
         uint32_t        fhlen = 0;
 
         if ((!fh) || (!pfh))
@@ -1102,6 +1109,7 @@ nfs3_sattr3_to_setattr_valid (sattr3 *sattr, struct iatt *buf, mode_t *omode)
 wcc_data
 nfs3_stat_to_wcc_data (struct iatt *pre, struct iatt *post)
 {
+	// malloc wd (wcc_data)
         wcc_data        wd = {{0}, };
 
         if (post)
@@ -1117,6 +1125,8 @@ nfs3_fill_create3res (create3res *res, nfsstat3 stat, struct nfs3_fh *newfh,
                       struct iatt *newbuf, struct iatt *preparent,
                       struct iatt *postparent, uint64_t deviceid)
 {
+	// convert data from newbuf,preparent,postparent,deviceid to res ?
+
         post_op_attr    poa = {0, };
         wcc_data        dirwcc = {{0}, };
 
@@ -1125,12 +1135,19 @@ nfs3_fill_create3res (create3res *res, nfsstat3 stat, struct nfs3_fh *newfh,
         if (stat != NFS3_OK)
                 return;
 
+        // newbuf ,preparent,potparent is iatt
+
+        // cp newfh to res ?
         nfs3_fill_post_op_fh3 (newfh, &res->create3res_u.resok.obj);
         nfs3_map_deviceid_to_statdev (newbuf, deviceid);
+
+        // cp newbuf to poa to res
         poa = nfs3_stat_to_post_op_attr (newbuf);
         res->create3res_u.resok.obj_attributes = poa;
+
         nfs3_map_deviceid_to_statdev (preparent, deviceid);
         nfs3_map_deviceid_to_statdev (postparent, deviceid);
+
         dirwcc = nfs3_stat_to_wcc_data (preparent, postparent);
 
         res->create3res_u.resok.dir_wcc = dirwcc;
@@ -1139,7 +1156,7 @@ nfs3_fill_create3res (create3res *res, nfsstat3 stat, struct nfs3_fh *newfh,
 void
 nfs3_prep_create3args (create3args *args, struct nfs3_fh *fh, char *name)
 {
-
+	// set args point to fd and name;
         memset (args, 0, sizeof (*args));
         args->where.dir.data.data_val = (void *)fh;
         args->where.name = name;
@@ -1659,6 +1676,8 @@ void
 nfs3_log_create_call (uint32_t xid, struct nfs3_fh *fh, char *name,
                       createmode3 mode)
 {
+	// just log;
+
         char    fhstr[1024];
         char    *modestr = NULL;
         char    exclmode[] = "EXCLUSIVE";
