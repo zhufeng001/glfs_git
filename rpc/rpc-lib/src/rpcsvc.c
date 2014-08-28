@@ -1178,6 +1178,8 @@ rpcsvc_error_reply (rpcsvc_request_t *req)
 inline int
 rpcsvc_program_register_portmap (rpcsvc_program_t *newprog, uint32_t port)
 {
+	// portmap service
+	// port and newprog
         int                ret   = 0;
 
         if (!newprog) {
@@ -1219,6 +1221,7 @@ out:
 int
 rpcsvc_register_portmap_enabled (rpcsvc_t *svc)
 {
+	// return register_portmap
         return svc->register_portmap;
 }
 

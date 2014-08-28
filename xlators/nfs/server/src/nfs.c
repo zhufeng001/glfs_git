@@ -109,7 +109,7 @@ nfs_init_versions (struct nfs_state *nfs, xlator_t *this)
                         ret = -1;
                         goto err;
                 }
-
+                // init return prog
                 prog = version->init (this);
                 if (!prog) {
                         ret = -1;
