@@ -648,9 +648,12 @@ nfs3_request_xlator_deviceid (rpcsvc_request_t *rq)
 
         if (!rq)
                 return 0;
-
+        // get rq->private
         xl = rpcsvc_request_private (rq);
+
+        // get rq->prog->private
         nfs3 = rpcsvc_request_program_private (rq);
+
         if (gf_nfs_dvm_off (nfs_state (nfs3->nfsx)))
                 devid = (uint64_t)nfs_xlator_to_xlid (nfs3->exportslist, xl);
         else {
@@ -2422,6 +2425,7 @@ nfs3svc_create_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
                 goto nfs3err;
         }
 
+        // buf is iatt
         nfs3_fh_build_child_fh (&cs->parent, buf, &cs->fh);
         oldinode = inode_link (inode, cs->resolvedloc.parent,
                                cs->resolvedloc.name, buf);
@@ -2435,8 +2439,11 @@ nfs3svc_create_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
 
         cs->preparent = *preparent;
         cs->postparent = *postparent;
+
+        // push data from req to nfu;
         nfs_request_user_init (&nfu, cs->req);
         uuid_copy (cs->resolvedloc.gfid, inode->gfid);
+
         ret = nfs_setattr (cs->nfsx, cs->vol, &nfu, &cs->resolvedloc,&cs->stbuf,
                            cs->setattr_valid, nfs3svc_create_setattr_cbk, cs);
         if (ret < 0)
@@ -2449,6 +2456,7 @@ nfs3err:
         }
 
         if (ret < 0) {
+        	// just log
                 nfs3_log_newfh_res (rpcsvc_request_xid (cs->req), NFS3_CREATE,
                                     stat, op_errno, &cs->fh);
                 nfs3_create_reply (cs->req, stat, &cs->fh, buf, preparent,

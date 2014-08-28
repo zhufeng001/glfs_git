@@ -584,6 +584,8 @@ fd_bind (fd_t *fd)
 static fd_t *
 __fd_create (inode_t *inode, uint64_t pid)
 {
+	//malloc fd;init fd's _ctx,lk_ctx,inode,pid,inode_list;
+	// return fd;
         fd_t *fd = NULL;
 
         if (inode == NULL) {
@@ -626,6 +628,10 @@ free_fd:
 fd_t *
 fd_create (inode_t *inode, pid_t pid)
 {
+	// fd->inode's lock
+	// ref inode;
+	// ref fd;
+	// return fd;
         fd_t *fd = NULL;
 
         fd = __fd_create (inode, (uint64_t)pid);

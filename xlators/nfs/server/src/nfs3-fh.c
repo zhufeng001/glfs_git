@@ -41,7 +41,7 @@ nfs3_fh_validate (struct nfs3_fh *fh)
         return 1;
 }
 
-
+// cp data to fd from buf;
 void
 nfs3_fh_init (struct nfs3_fh *fh, struct iatt *buf)
 {
@@ -163,9 +163,11 @@ int
 nfs3_fh_build_child_fh (struct nfs3_fh *parent, struct iatt *newstat,
                         struct nfs3_fh *newfh)
 {
+	// init newfh by parent and newstat
+
         if ((!parent) || (!newstat) || (!newfh))
                 return -1;
-
+        // cp newstat to newfh;
         nfs3_fh_init (newfh, newstat);
         uuid_copy (newfh->exportid, parent->exportid);
 

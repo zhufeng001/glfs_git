@@ -92,6 +92,7 @@ struct nfs_inode_ctx {
 
 #define gf_nfs_dvm_on(nfsstt)   (((struct nfs_state *)nfsstt)->dynamicvolumes == GF_NFS_DVM_ON)
 #define gf_nfs_dvm_off(nfsstt)  (((struct nfs_state *)nfsstt)->dynamicvolumes == GF_NFS_DVM_OFF)
+// check enable_ino32
 #define __gf_nfs_enable_ino32(nfsstt)     (((struct nfs_state *)nfsstt)->enable_ino32)
 #define gf_nfs_this_private     ((struct nfs_state *)((xlator_t *)THIS)->private)
 #define gf_nfs_enable_ino32()     (__gf_nfs_enable_ino32(gf_nfs_this_private))

@@ -93,6 +93,7 @@ struct nfs3stat_strerror nfs3stat_strerror_table[] = {
 uint64_t
 nfs3_iatt_gfid_to_ino (struct iatt *buf)
 {
+	// get buf's ino
         uint64_t ino  = 0;
 
         if (!buf)
@@ -3276,6 +3277,8 @@ struct nfs3op_str nfs3op_strings[] = {
 int
 nfs3_loglevel (int nfs_op, nfsstat3 stat) {
 
+	// get loglevel by switch nfs_op ,and switch stat
+
 	int	ll = GF_LOG_DEBUG;
 
 	switch (nfs_op) {
@@ -3440,6 +3443,8 @@ void
 nfs3_log_newfh_res (uint32_t xid, int op, nfsstat3 stat, int pstat,
                     struct nfs3_fh *newfh)
 {
+	// just for log
+
         char    errstr[1024];
         char    fhstr[1024];
 	int	ll = nfs3_loglevel (op, stat);

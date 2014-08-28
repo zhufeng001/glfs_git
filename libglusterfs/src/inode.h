@@ -196,6 +196,7 @@ inode_ctx_put(inode_t *inode, xlator_t *this, uint64_t v)
 }
 
 #define __inode_ctx_get(i,x,v) __inode_ctx_get2(i,x,v,0)
+// get v from i->_ctx by x;
 #define inode_ctx_get(i,x,v) inode_ctx_get2(i,x,v,0)
 
 #define inode_ctx_del(i,x,v) inode_ctx_del2(i,x,v,0)

@@ -410,6 +410,7 @@ err:
 uint32_t
 nfs_hash_gfid (uuid_t gfid)
 {
+	// from gfid get hash
         uint32_t                hash = 0;
         uint64_t                msb64 = 0;
         uint64_t                lsb64 = 0;
@@ -443,6 +444,8 @@ nfs_hash_gfid (uuid_t gfid)
 void
 nfs_fix_generation (xlator_t *this, inode_t *inode)
 {
+	// put this->private to inode->_ctx;
+
         uint64_t                 raw_ctx        = 0;
         struct nfs_inode_ctx    *ictx           = NULL;
         struct nfs_state        *priv           = NULL;
@@ -452,8 +455,10 @@ nfs_fix_generation (xlator_t *this, inode_t *inode)
                 return;
         }
         priv = this->private;
+        // this as xlator to get raw_ctx
 
         if (inode_ctx_get(inode,this,&raw_ctx) == 0) {
+        	// get ictx;
                 ictx = (struct nfs_inode_ctx *)raw_ctx;
                 ictx->generation = priv->generation;
         }
@@ -467,6 +472,7 @@ nfs_fix_generation (xlator_t *this, inode_t *inode)
                 }
                 INIT_LIST_HEAD(&ictx->shares);
                 ictx->generation = priv->generation;
+                // set ictx and this to inode->_ctx
                 ret = inode_ctx_put (inode, this, (uint64_t)ictx);
                 if (ret) {
                         gf_log (this->name, GF_LOG_ERROR,

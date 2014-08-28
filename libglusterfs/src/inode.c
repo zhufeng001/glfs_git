@@ -1514,6 +1514,9 @@ int
 __inode_ctx_set2 (inode_t *inode, xlator_t *xlator, uint64_t *value1_p,
                   uint64_t *value2_p)
 {
+	// xlator as key,v1 and v2 as val ,set to inode->_ctx
+	// inode->table->ctxcount ??
+
         int ret = 0;
         int index = 0;
         int set_idx = -1;
@@ -1572,6 +1575,7 @@ int
 __inode_ctx_get2 (inode_t *inode, xlator_t *xlator, uint64_t *value1,
                   uint64_t *value2)
 {
+	// get value1,value2 from inode->_ctx by cmp _ctx[index].xl_key and xlator;
         int index = 0;
         int ret = 0;
 

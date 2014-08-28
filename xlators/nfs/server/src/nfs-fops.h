@@ -121,7 +121,8 @@ nfs_fop_local_wipe (xlator_t *xl, struct nfs_fop_local *l);
         } while (0)                                                     \
 
 
-
+// get nflocal,pcbk from fram;
+// set fram->local to nflocal->proglocal;
 #define nfl_to_prog_data(nflocal, pcbk, fram)                           \
         do {                                                            \
                 nflocal = fram->local;                                  \
@@ -131,6 +132,8 @@ nfs_fop_local_wipe (xlator_t *xl, struct nfs_fop_local *l);
 
 // malloc nfloc
 // cbk set to nfl->progcbk
+// malloc and init nfl by args;
+// ((call_frame_t *)fram)->local = nflocal;
 #define nfs_fop_handle_local_init(fram,nfx, nfloc, cbck,prgloc,retval,lab)  \
         do {                                                                \
                 prog_data_to_nfl (nfx, nfloc, fram, cbck, prgloc);      \

@@ -143,6 +143,7 @@ out:
 fd_lk_ctx_t *
 fd_lk_ctx_create ()
 {
+	// malloc fd_lk_ctx; init fd_lk_ctx's lk_list,lock
         fd_lk_ctx_t *fd_lk_ctx = NULL;
 
         fd_lk_ctx = GF_CALLOC (1, sizeof (fd_lk_ctx_t),

@@ -123,6 +123,7 @@ nfs_fop_local_init (xlator_t *nfsx)
 void
 nfs_fop_local_wipe (xlator_t *nfsx, struct nfs_fop_local *l)
 {
+	// free nfs_fop_local; l ;
         if ((!nfsx) || (!l))
                 return;
 
@@ -265,6 +266,10 @@ err:
 /* Use the state saved by the previous macro to funge the ino in the appropriate
  * structure.
  */
+
+// check fopret
+// check locl->rootinode and rootparentinode;
+// set preattr / postattr or prepar / postpar;
 #define nfs_fop_restore_root_ino(locl, fopret, preattr, postattr, prepar, postpar)  \
         do {                                                                \
                 if (fopret == -1)                                           \
@@ -801,13 +806,23 @@ nfs_fop_create_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
         struct nfs_fop_local    *nfl = NULL;
         fop_create_cbk_t        progcbk = NULL;
 
+        // put this->private to inode->_ctx;
         if (op_ret == 0) {
                 nfs_fix_generation(this,inode);
         }
 
+        // get nflocal,pcbk from fram;
+        // set fram->local to nflocal->proglocal;
         nfl_to_prog_data (nfl, progcbk, frame);
+
+        // check fopret
+        // check locl->rootinode and rootparentinode;
+        // set preattr / postattr or prepar / postpar;
+        // locl, fopret, preattr, postattr, prepar, postpar
         nfs_fop_restore_root_ino (nfl, op_ret, buf, NULL, preparent,
                                   postparent);
+
+        // nfs_inode_create_cbk
         if (progcbk)
                 progcbk (frame, cookie, this, op_ret, op_errno, fd, inode, buf,
                          preparent, postparent, NULL);
@@ -830,11 +845,26 @@ nfs_fop_create (xlator_t *nfsx, xlator_t *xl, nfs_user_t *nfu, loc_t *pathloc,
                 return ret;
 
         gf_log (GF_NFS, GF_LOG_TRACE, "Create: %s", pathloc->path);
+
+        // cp nfuser's data to fram->root
+        // fram = xla && nfuser
         nfs_fop_handle_frame_create (frame, nfsx, nfu, ret, err);
+
+        // malloc nfloc
+        // cbk set to nfl->progcbk
+        // malloc and init nfl by args;
+        // ((call_frame_t *)fram)->local = nflocal;
+        // local as proglocal;
+        // cbk as procbk;
         nfs_fop_handle_local_init (frame, nfsx, nfl, cbk, local, ret, err);
+
+        // check loc is root ? and set locl ? set rootinode and rootparentinode
         nfs_fop_save_root_ino (nfl, pathloc);
+
+        // create nflcl->dictgfid (check inode->gfid)
         nfs_fop_gfid_setup (nfl, pathloc->inode, ret, err);
 
+        // pathloc ,flags,mode,0,fd,nfl->dictgfid is args;
         STACK_WIND_COOKIE (frame, nfs_fop_create_cbk, xl, xl, xl->fops->create,
                            pathloc, flags, mode, 0, fd, nfl->dictgfid);
 

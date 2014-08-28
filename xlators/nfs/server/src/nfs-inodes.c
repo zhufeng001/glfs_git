@@ -23,6 +23,9 @@
 
 #include <libgen.h>
 
+// free fram->local; nflocal;
+// set frame->local to proglocal;
+// get pcbk;
 #define inodes_nfl_to_prog_data(nflocal, pcbk, fram)                    \
         do {                                                            \
                 nflocal = fram->local;                                  \
@@ -35,6 +38,7 @@ void
 nfl_inodes_init (struct nfs_fop_local *nfl, inode_t *inode, inode_t *parent,
                  inode_t *newparent, const char *name, const char *newname)
 {
+	// cp args to nfl's inode,parent,newparent,path,newpath;
         if (!nfl)
                 return;
 
@@ -56,6 +60,8 @@ nfl_inodes_init (struct nfs_fop_local *nfl, inode_t *inode, inode_t *parent,
         return;
 }
 
+// progcbk (frame, cookie, this, op_ret, op_errno, fd, inode, buf,
+// preparent, postparent, NULL)
 
 int32_t
 nfs_inode_create_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
@@ -70,6 +76,7 @@ nfs_inode_create_cbk (call_frame_t *frame, void *cookie, xlator_t *this,
         if (op_ret == -1)
                 goto do_not_link;
 
+        // buf is iatt
         linked_inode = inode_link (inode, nfl->parent, nfl->path, buf);
 
 do_not_link:
@@ -77,6 +84,10 @@ do_not_link:
          * be a valid fd.
          */
         fd_unref (fd);
+
+        // free fram->local; nflocal;
+        // set frame->local to proglocal;
+        // get pcbk; from nfl->proglocal
 
         inodes_nfl_to_prog_data (nfl, progcbk, frame);
         if (progcbk)
@@ -104,6 +115,11 @@ nfs_inode_create (xlator_t *nfsx, xlator_t *xl, nfs_user_t *nfu,
         if ((!nfsx) || (!xl) || (!pathloc) || (!nfu))
                 return ret;
 
+        // malloc and init nfl by args;
+        // malloc nfloc
+        // cbk set to nfl->progcbk
+        // malloc and init nfl by args;
+        // ((call_frame_t *)fram)->local = nflocal;
         nfs_fop_handle_local_init (NULL, nfsx, nfl, cbk, local, ret, err);
 
         newfd = fd_create (pathloc->inode, 0);
@@ -116,6 +132,9 @@ nfs_inode_create (xlator_t *nfsx, xlator_t *xl, nfs_user_t *nfu,
         /* The parent and base name will be needed to link the new inode
          * into the inode table.
          */
+        // cp pathloc data to nfl
+        // nfl is proglocal
+        // nfs_inode_create_cbk is progcbk
         nfl_inodes_init (nfl, pathloc->inode, pathloc->parent, NULL,
                          pathloc->name, NULL);
         ret = nfs_fop_create (nfsx, xl, nfu, pathloc, flags, mode, newfd,

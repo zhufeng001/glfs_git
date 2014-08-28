@@ -99,6 +99,9 @@ nfs_create (xlator_t *nfsx, xlator_t *xl, nfs_user_t *nfu, loc_t *pathloc,
 
         if ((!nfsx) || (!xl) || (!pathloc) || (!nfu))
                 return ret;
+        // cbk is nfs3svc_create_cbk
+        // nfs_fop_handle_local_init (NULL, nfsx, nfl, cbk, local, ret, err);
+        // nfs_fop_handle_local_init (frame, nfsx, nfl, cbk, local, ret, err);
 
         ret = nfs_inode_create (nfsx, xl, nfu, pathloc, flags, mode, cbk,local);
         return ret;
